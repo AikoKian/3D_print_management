@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_print_type_manager,access.print.material.type.manager,model_print_material_type,3D_print_management.group_print_manager,1,1,1,1
+access_print_type_user,access.print.material.type.user,model_print_material_type,3D_print_management.group_print_user,1,0,0,0
+access_print_material,access.print.material,model_print_material,3D_print_management.group_print_user,1,1,1,1
+access_print_printer,access.print.printer,model_print_printer,3D_print_management.group_print_user,1,1,1,1
+access_print_project,access.print.project,model_print_project,3D_print_management.group_print_user,1,1,1,1
+access_print_project_line,access.print.project_line,model_print_project_line,3D_print_management.group_print_user,1,1,1,1

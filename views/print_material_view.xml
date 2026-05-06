@@ -1,0 +1,106 @@
+<odoo>
+    <menuitem id="menu_print_root" 
+          name="Impresión 3D" 
+          web_icon="3D_print_management,static/description/icon.png" 
+          sequence="10"/>
+
+    <menuitem id="menu_print_root" name="Impresión 3D" web_icon="fa,fa-cube" sequence="10"/>
+
+    <record id="view_print_material_tree" model="ir.ui.view">
+        <field name="name">print.material.tree</field>
+        <field name="model">print.material</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="brand"/>
+                <field name="material_type_id"/>
+                <field name="weight_available"/>
+                <field name="price_per_gram"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_print_material_form" model="ir.ui.view">
+        <field name="name">print.material.form</field>
+        <field name="model">print.material</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object" 
+                                name="action_view_purchases" 
+                                class="oe_stat_button" 
+                                icon="fa-shopping-cart" 
+                                attrs="{'invisible': [('product_id', '=', False)]}">
+                            <field name="purchase_count" widget="statinfo" string="Compras"/>
+                        </button>
+
+                        <button type="object" name="action_update_stock" class="oe_stat_button" icon="fa-cubes">
+                            <div class="o_stat_info">
+                                <span class="o_stat_value"><field name="weight_available"/> g</span>
+                                <span class="o_stat_text">Ajustar Stock</span>
+                            </div>
+                        </button>
+                        <button name="action_view_inventory_product" type="object" class="oe_stat_button" icon="fa-archive" attrs="{'invisible': [('product_id', '=', False)]}">
+                            <div class="o_stat_info"><span class="o_stat_text">Ver Inventario</span></div>
+                        </button>
+                        <button type="object" name="action_open_product" class="oe_stat_button" icon="fa-cog">
+                            <div class="o_stat_info"><span class="o_stat_text">Ajustes Producto</span></div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Ej. Bobina PLA Azul..."/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="brand"/>
+                            <field name="material_type_id" options="{'no_create': True}"/>
+                            <field name="color_name"/>
+                        </group>
+                        <group>
+                            <field name="price_per_gram" widget="monetary"/>
+                            <field name="base_cost" widget="monetary"/>
+                            <field name="product_id" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_print_material" model="ir.actions.act_window">
+        <field name="name">Inventario de Filamentos</field>
+        <field name="res_model">print.material</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_print_material" name="Materiales" parent="menu_print_root" action="action_print_material" sequence="20"/>
+
+    <record id="view_print_material_type_tree" model="ir.ui.view">
+        <field name="name">print.material.type.tree</field>
+        <field name="model">print.material.type</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="name"/>
+                <field name="description"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_print_material_type" model="ir.actions.act_window">
+        <field name="name">Tipos de Filamento</field>
+        <field name="res_model">print.material.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_print_config" 
+              name="Configuración" 
+              parent="menu_print_root" 
+              sequence="100"/>
+
+    <menuitem id="menu_print_material_type" 
+              name="Tipos de Material" 
+              parent="menu_print_config" 
+              action="action_print_material_type" 
+              sequence="10"/>
+</odoo>

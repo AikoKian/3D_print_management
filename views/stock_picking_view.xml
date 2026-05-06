@@ -1,0 +1,32 @@
+<odoo>
+    <record id="view_picking_form_inherit_3d_print" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.3d.print</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                
+                <field name="purchase_id" invisible="1"/>
+
+                <button name="action_view_related_purchase" 
+                        type="object" 
+                        class="oe_stat_button" 
+                        icon="fa-shopping-cart" 
+                        attrs="{'invisible': [('purchase_id', '=', False)]}">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Ver Pedido</span>
+                    </div>
+                </button>
+                <button name="action_view_related_invoices" 
+                        type="object" 
+                        class="oe_stat_button" 
+                        icon="fa-pencil-square-o" 
+                        attrs="{'invisible': [('purchase_id', '=', False)]}">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Ver Facturas</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,48 @@
+<odoo>
+    <record id="view_print_printer_tree" model="ir.ui.view">
+        <field name="name">print.printer.tree</field>
+        <field name="model">print.printer</field>
+        <field name="arch" type="xml">
+            <tree decoration-success="state == 'free'" decoration-info="state == 'busy'" decoration-warning="state == 'maintenance'" decoration-danger="state == 'broken'">
+                <field name="name"/>
+                <field name="brand"/>
+                <field name="hourly_rate" widget="monetary"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_print_printer_form" model="ir.ui.view">
+        <field name="name">print.printer.form</field>
+        <field name="model">print.printer</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Ej. Ender 3 V3"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="brand"/>
+                            <field name="hourly_rate" widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="supported_type_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_print_printer" model="ir.actions.act_window">
+        <field name="name">Impresoras 3D</field>
+        <field name="res_model">print.printer</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_print_printer" name="Impresoras" parent="menu_print_root" action="action_print_printer" sequence="30"/>
+</odoo>
