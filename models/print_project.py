@@ -15,6 +15,8 @@ class PrintProject(models.Model):
     
     line_ids = fields.One2many('print.project.line', 'project_id', string='Materiales a Consumir')
     sale_order_id = fields.Many2one('sale.order', string='Venta Generada', readonly=True)
+    is_manager = fields.Boolean(compute='_compute_is_manager')
+
 
     # --- Estados ---
     state = fields.Selection([
@@ -203,8 +205,6 @@ class PrintProjectLine(models.Model):
                 raise UserError(f"Seguridad: No se puede eliminar el proyecto '{rec.name}' porque ya se encuentra Finalizado.")
             
             
-    is_manager = fields.Boolean(compute='_compute_is_manager')
-
     def _compute_is_manager(self):
         for rec in self:
             rec.is_manager = self.env.user.has_group('3D_print_management.group_print_manager')
