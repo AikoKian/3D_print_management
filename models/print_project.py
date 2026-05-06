@@ -17,7 +17,6 @@ class PrintProject(models.Model):
     sale_order_id = fields.Many2one('sale.order', string='Venta Generada', readonly=True)
     is_manager = fields.Boolean(compute='_compute_is_manager')
 
-
     # --- Estados ---
     state = fields.Selection([
         ('draft', 'Borrador'),
@@ -65,7 +64,6 @@ class PrintProject(models.Model):
     def _compute_total_price(self):
         """Calcula el precio técnico. Usa horas reales si existen, sino usa estimadas."""
         for rec in self:
-            # Si estamos en impresión o revisión usamos las reales, en borrador las estimadas
             horas_calculo = rec.real_hours if rec.real_hours > 0 else rec.estimated_hours
             mquina = horas_calculo * (rec.printer_id.hourly_rate or 0.0)
             laboral = rec.labor_hours * rec.labor_rate
@@ -76,7 +74,7 @@ class PrintProject(models.Model):
     def _onchange_price_inputs(self):
         """Sincroniza el precio final real con el sugerido al cambiar cualquier parámetro."""
         if self.state in ['draft', 'in_progress']:
-            self._compute_total_price() # Forzamos el cálculo previo
+            self._compute_total_price()
             self.final_price = self.total_calculated_price
 
     # --- Funciones de Transición y Utilidad ---
@@ -101,7 +99,7 @@ class PrintProject(models.Model):
                 'tag': 'display_notification',
                 'params': {
                     'title': 'Análisis de Viabilidad',
-                    'cancelado': "\n".join(mensajes),
+                    'message': "\n".join(mensajes),
                     'sticky': True,
                     'type': 'danger' if any("❌" in m for m in mensajes) else 'warning',
                 }
@@ -166,9 +164,35 @@ class PrintProject(models.Model):
         self.ensure_one()
         return {'type': 'ir.actions.act_window', 'name': 'Presupuesto Generado', 'res_model': 'sale.order', 'res_id': self.sale_order_id.id, 'view_mode': 'form', 'target': 'current'}
 
+    # --- RESTRICCIONES DE SEGURIDAD ---
+    
+    def _compute_is_manager(self):
+        for rec in self:
+            rec.is_manager = self.env.user.has_group('3D_print_management.group_print_manager')
+
+    def write(self, vals):
+        """Impide que los operadores modifiquen el precio final."""
+        if 'final_price' in vals:
+            if not self.env.user.has_group('3D_print_management.group_print_manager'):
+                for rec in self:
+                    if rec.final_price != vals.get('final_price'):
+                        raise AccessError("Solo los Administradores tienen permiso para modificar el Precio Final de forma manual.")
+        return super(PrintProject, self).write(vals)
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_done(self):
+        """Impide eliminar proyectos finalizados."""
+        for rec in self:
+            if rec.state == 'done':
+                raise UserError(f"Seguridad: No se puede eliminar el proyecto '{rec.name}' porque ya se encuentra Finalizado.")
+
+# =========================================================================
+# NUEVA CLASE: LÍNEA DE PROYECTO (Debe estar separada)
+# =========================================================================
 class PrintProjectLine(models.Model):
     _name = 'print.project.line'
     _description = 'Línea de Consumo'
+    
     project_id = fields.Many2one('print.project', ondelete='cascade')
     material_id = fields.Many2one('print.material', required=True)
     stock_available = fields.Float(related='material_id.weight_available', readonly=True)
@@ -182,29 +206,3 @@ class PrintProjectLine(models.Model):
             if diff < 0: rec.inventory_status = 'insufficient'
             elif diff < 500: rec.inventory_status = 'low'
             else: rec.inventory_status = 'ok'
-
-    # --- RESTRICCIONES DE SEGURIDAD ---
-
-    def write(self, vals):
-        """Impide que los operadores modifiquen el precio final."""
-        if 'final_price' in vals:
-            # Verifica si el usuario actual NO tiene el rol de Administrador
-            if not self.env.user.has_group('3D_print_management.group_print_manager'):
-                # Comparamos si el valor realmente está cambiando para no bloquear el onchange automático
-                for rec in self:
-                    if rec.final_price != vals.get('final_price'):
-                        raise AccessError("Solo los Administradores tienen permiso para modificar el Precio Final de forma manual.")
-        
-        return super(PrintProject, self).write(vals)
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_done(self):
-        """Impide eliminar proyectos finalizados (Aplica para todos, incluidos Administradores)."""
-        for rec in self:
-            if rec.state == 'done':
-                raise UserError(f"Seguridad: No se puede eliminar el proyecto '{rec.name}' porque ya se encuentra Finalizado.")
-            
-            
-    def _compute_is_manager(self):
-        for rec in self:
-            rec.is_manager = self.env.user.has_group('3D_print_management.group_print_manager')
