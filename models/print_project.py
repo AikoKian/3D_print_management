@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, AccessError
 
 class PrintProject(models.Model):
     _name = 'print.project'
@@ -180,3 +180,31 @@ class PrintProjectLine(models.Model):
             if diff < 0: rec.inventory_status = 'insufficient'
             elif diff < 500: rec.inventory_status = 'low'
             else: rec.inventory_status = 'ok'
+
+    # --- RESTRICCIONES DE SEGURIDAD ---
+
+    def write(self, vals):
+        """Impide que los operadores modifiquen el precio final."""
+        if 'final_price' in vals:
+            # Verifica si el usuario actual NO tiene el rol de Administrador
+            if not self.env.user.has_group('3D_print_management.group_print_manager'):
+                # Comparamos si el valor realmente está cambiando para no bloquear el onchange automático
+                for rec in self:
+                    if rec.final_price != vals.get('final_price'):
+                        raise AccessError("Solo los Administradores tienen permiso para modificar el Precio Final de forma manual.")
+        
+        return super(PrintProject, self).write(vals)
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_done(self):
+        """Impide eliminar proyectos finalizados (Aplica para todos, incluidos Administradores)."""
+        for rec in self:
+            if rec.state == 'done':
+                raise UserError(f"Seguridad: No se puede eliminar el proyecto '{rec.name}' porque ya se encuentra Finalizado.")
+            
+            
+    is_manager = fields.Boolean(compute='_compute_is_manager')
+
+    def _compute_is_manager(self):
+        for rec in self:
+            rec.is_manager = self.env.user.has_group('3D_print_management.group_print_manager')

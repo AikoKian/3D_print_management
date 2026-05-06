@@ -51,7 +51,11 @@
                         </group>
                         <group string="Liquidación y Costeo">
                             <field name="total_calculated_price" widget="monetary" readonly="1" style="color: #7f8c8d; font-style: italic;"/>
-                            <field name="final_price" widget="monetary" style="font-size: 1.4em; font-weight: bold; color: #2ecc71;"/>
+                            <field name="is_manager" invisible="1"/>
+                            <field name="final_price" 
+                                widget="monetary" 
+                                style="font-size: 1.4em; font-weight: bold; color: #2ecc71;" 
+                                attrs="{'readonly': [('is_manager', '=', False)]}"/>
                             <field name="price_notes" placeholder="Notas sobre el precio o descuentos..."/>
                             <field name="sale_order_id" readonly="1" attrs="{'invisible': [('sale_order_id', '=', False)]}"/>
                         </group>
