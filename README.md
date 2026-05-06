@@ -1,7 +1,7 @@
 
 # Gestion de Proyectos de Impresion 3D (Odoo 16)
 
-Este modulo transforma Odoo en una central de operaciones para granjas de impresion 3D o servicios de fabricacion por encargo. Permite centralizar desde el diseño tecnico hasta el despacho final, integrando de forma nativa los flujos comerciales y logisticos.
+Este modulo transforma Odoo en una central de operaciones para gestionar proyectos de impresion 3D o servicios de fabricacion por encargo. Permite centralizar desde el diseño tecnico hasta el despacho final, integrando de forma nativa los flujos comerciales y logisticos.
 
 ---
 
